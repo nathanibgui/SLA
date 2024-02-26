@@ -1,0 +1,54 @@
+- name: Update & upgrade all packages
+  shell: sudo apt-get update && sudo apt-get upgrade -y
+
+- name: Install Node.js
+  apt:
+    name: nodejs
+    state: present
+
+- name: Install nginx
+  apt:
+    name: nginx
+    state: latest
+  become: yes
+  become_method: sudo
+
+- name: Copy the front-end files
+  copy:
+    src: /home/admin/front.tar.gz 
+    dest: /home/admin/
+  become: yes
+
+- name: Extract the front-end files
+  shell: "sudo tar -xzvf /home/admin/front.tar.gz -C /home/admin/"
+
+- name: Disable apache2
+  service:
+    name: apache2
+    state: stopped
+    enabled: no
+  ignore_errors: yes
+  become: yes
+  become_method: sudo
+
+- name: Copy the nginx configuration file
+  copy:
+    src: /home/admin/ansible/nginx.front.txt
+    dest: /etc/nginx/sites-available/default
+  become: yes
+  become_method: sudo
+
+- name: Ensure symlink for nginx config exists
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  become: yes
+  become_method: sudo
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+  become: yes
+  become_method: sudo

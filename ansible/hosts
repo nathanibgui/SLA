@@ -1,0 +1,8 @@
+[sla_backend]
+13.51.10.104 ansible_user=admin ansible_ssh_private_key_file=/home/admin/.ssh/ansible.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[sla_mysql]
+13.49.237.94 ansible_user=admin ansible_ssh_private_key_file=/home/admin/.ssh/ansible.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+[sla_frontend]
+51.20.169.186 ansible_user=admin ansible_ssh_private_key_file=/home/admin/.ssh/ansible.pem ansible_ssh_common_args='-o StrictHostKeyChecking=no'

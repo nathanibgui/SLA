@@ -1,0 +1,18 @@
+- hosts: sla_mysql
+  become: yes
+  become_method: sudo
+  roles:
+    - database
+
+- hosts: sla_backend
+  become: true
+  become_method: sudo
+  roles:
+    - backend
+
+- hosts: sla_frontend
+  become: yes
+  become_method: sudo
+  roles:
+    - frontend
+    

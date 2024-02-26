@@ -1,0 +1,53 @@
+- name: Update & upgrade all packages
+  shell: sudo apt-get update && sudo apt-get upgrade -y
+
+- name: Install Mysql
+  apt:
+    name: default-mysql-server
+    state: present
+  become: yes
+  become_method: sudo
+
+- name: Install python3-mysqldb
+  apt:
+    name: python3-mysqldb
+    state: present
+  become: yes
+  become_method: sudo
+
+- name: Start and enable MySQL service
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Allow full access remotely
+  copy:
+    src: /home/admin/ansible/50-server.cnf
+    dest: /etc/mysql/mariadb.conf.d/
+  become: yes
+
+- name: Create admin user with remote access
+  mysql_user:
+    name: "nsa"
+    password: "admin123"
+    priv: '*.*:ALL,GRANT'
+    host: '%'
+    state: present
+    login_user: root
+    login_password: "root456"
+
+- name: Create application database
+  mysql_db:
+    name: "nsa"
+    state: present
+    login_user: root
+    login_password: "root456"
+
+- name: Restart MySQL service
+  service:
+    name: mariadb
+    state: restarted
+    enabled: yes
+  become: yes
+  become_method: sudo

@@ -1,0 +1,86 @@
+- name: Update & upgrade all packages
+  shell: sudo apt-get update && sudo apt-get upgrade -y
+
+- name: Install basic packages
+  apt:
+    pkg:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+  become: yes
+  become_method: sudo
+
+- name: Add gpg key
+  shell: curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+  become: yes
+  become_method: sudo
+
+- name: add PHP repository
+  shell: curl -sSL https://packages.sury.org/php/README.txt | sudo bash -x
+  become: yes
+  become_method: sudo
+
+- name: Installation PHP extensions
+  apt: 
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - php7.4
+    - php7.4-fpm
+    - php7.4-mysql
+  become: yes
+  become_method: sudo
+
+- name: Apt update
+  apt:
+    update_cache: yes
+  become: yes
+  become_method: sudo
+
+- name: Disable apache2
+  service:
+    name: apache2
+    state: stopped
+    enabled: no
+  become: yes
+  become_method: sudo
+
+- name: Install nginx
+  apt:
+    name: nginx
+  become: yes
+  become_method: sudo
+
+- name: Copy the back-end files
+  copy:
+    src: /home/admin/back.tar.gz 
+    dest: /home/admin/
+  become: yes
+  become_method: sudo
+
+- name: Extract the back-end files
+  shell: "sudo tar -xzvf /home/admin/back.tar.gz -C /home/admin/"
+
+- name: rename the .env file
+  shell: "sudo mv /home/admin/back/.env.example /home/admin/back/.env"
+
+- name: Copy the nginx configuration file
+  copy:
+    src: /home/admin/ansible/nginx.back.txt
+    dest: /etc/nginx/sites-available/default
+  become: yes
+  become_method: sudo
+
+- name: Start migration
+  shell: "sudo php /home/admin/back/artisan migrate"
+  become: yes
+  become_method: sudo
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+  become: yes
+  become_method: sudo
